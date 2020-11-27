@@ -32,7 +32,7 @@
 
 @interface ZFAVPlayerManager : NSObject <ZFPlayerMediaPlayback>
 
-@property (nonatomic, strong, readonly) AVURLAsset *asset;
+@property (nonatomic, strong) AVAsset *asset;
 @property (nonatomic, strong, readonly) AVPlayerItem *playerItem;
 @property (nonatomic, strong, readonly) AVPlayer *player;
 @property (nonatomic, assign) NSTimeInterval timeRefreshInterval;

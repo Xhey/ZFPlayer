@@ -131,7 +131,7 @@ static NSString *const kPresentationSize         = @"presentationSize";
 }
 
 - (void)prepareToPlay {
-    if (!_assetURL) return;
+    if (!_assetURL && !_asset) return;
     _isPreparedToPlay = YES;
     [self initializePlayer];
     if (self.shouldAutoPlay) {
@@ -263,7 +263,19 @@ static NSString *const kPresentationSize         = @"presentationSize";
 }
 
 - (void)initializePlayer {
-    _asset = [AVURLAsset URLAssetWithURL:self.assetURL options:self.requestHeader];
+    if (_asset) {
+        // 只为构造一个URL
+        if([_asset isKindOfClass:[AVComposition class]]) {
+            AVComposition *composition = (AVComposition *)_asset;
+            for (AVCompositionTrack *track in composition.tracks) {
+                AVCompositionTrackSegment *s = track.segments.firstObject;
+                _assetURL = s.sourceURL;
+                break;
+            }
+        }
+    } else {
+        _asset = [AVURLAsset URLAssetWithURL:self.assetURL options:self.requestHeader];
+    }
     _playerItem = [AVPlayerItem playerItemWithAsset:_asset];
     _player = [AVPlayer playerWithPlayerItem:_playerItem];
     _imageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:_asset];
@@ -464,6 +476,12 @@ static NSString *const kPresentationSize         = @"presentationSize";
 - (void)setAssetURL:(NSURL *)assetURL {
     if (self.player) [self stop];
     _assetURL = assetURL;
+    [self prepareToPlay];
+}
+
+- (void)setAsset:(AVAsset *)asset {
+    if (self.player) [self stop];
+    _asset = asset;
     [self prepareToPlay];
 }
 
